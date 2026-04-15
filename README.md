@@ -4,6 +4,8 @@ This started as a fun side project more than 10 years ago, originally used to ad
 Now it has been revived into a complete TypeScript library with AI assistance, plus a modern Playground that includes a huge built-in RTTTL preset library ready to copy and play.
 Not sure if anyone will use this project, but I'll publish it just for fun.
 
+## Screenshot
+![Web RTTTL Synth Playground screenshot](https://github.com/user-attachments/assets/e8e3994f-6458-4911-b75d-c172155a13c4)
 
 ## Install
 
