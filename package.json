@@ -1,6 +1,6 @@
 {
     "name": "web-rtttl-synth",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "RTTTL parser and Web Audio synth playback library for browsers.",
     "homepage": "https://github.com/viet241/web-rtttl-synth#readme",
     "bugs": {
