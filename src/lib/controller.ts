@@ -1,4 +1,5 @@
 import {WebAudioEngine} from './engine';
+import {warmupAudioContext} from './audio-context';
 import {parseRTTTLWithMetadata} from './parser';
 import type {PlaybackHandle, SynthController, SynthLoadOptions, SynthPlayOptions} from './types';
 
@@ -48,6 +49,10 @@ class SynthControllerImpl implements SynthController {
 
 export function createSynth(): SynthController {
     return new SynthControllerImpl();
+}
+
+export async function warmupAudio(): Promise<void> {
+    await warmupAudioContext();
 }
 
 export async function playRTTTL(rtttlText: string, options: SynthPlayOptions = {}): Promise<PlaybackHandle> {

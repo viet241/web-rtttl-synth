@@ -1,4 +1,5 @@
 import {getFrequencyFromPitch} from './pitch';
+import {getSharedAudioContext, hasWarmedUpAudioContext} from './audio-context';
 import type {ExtendedOscillatorType, NoteEvent, SynthPlayOptions} from './types';
 
 interface ScheduledPoint {
@@ -16,16 +17,7 @@ export function buildPlaybackTimeline(notes: NoteEvent[], bpm: number): Schedule
     }));
 }
 
-function getAudioContextCtor(): typeof AudioContext {
-    const ctor = window.AudioContext || (window as Window & {webkitAudioContext?: typeof AudioContext}).webkitAudioContext;
-    if (!ctor) {
-        throw new Error('Web Audio API is not available in this environment.');
-    }
-    return ctor;
-}
-
 export class WebAudioEngine {
-    private audioCtx: AudioContext | null = null;
     private activeSources: AudioScheduledSourceNode[] = [];
     private activeTimeouts: number[] = [];
     private endResolver: (() => void) | null = null;
@@ -34,11 +26,7 @@ export class WebAudioEngine {
     private hasStartedPlayback = false;
 
     private ensureContext(): AudioContext {
-        if (!this.audioCtx) {
-            const Ctor = getAudioContextCtor();
-            this.audioCtx = new Ctor();
-        }
-        return this.audioCtx;
+        return getSharedAudioContext();
     }
 
     private scheduleSource(
@@ -139,7 +127,8 @@ export class WebAudioEngine {
 
         this.currentPlayOptions = options;
         const oscillatorType = options.oscillatorType ?? 'sine';
-        const startAt = ctx.currentTime + 0.08;
+        const startOffsetSeconds = hasWarmedUpAudioContext() ? 0.03 : 0.08;
+        const startAt = ctx.currentTime + startOffsetSeconds;
         const timeline = buildPlaybackTimeline(notes, bpm);
         const totalNotes = notes.length;
         let playedCount = 0;

@@ -1,7 +1,7 @@
 import {useEffect, useMemo, useRef, useState} from 'react';
 import {Activity, Play, Square, Github} from 'lucide-react';
 import {Link} from 'react-router-dom';
-import {createSynth, extractRTTTLBpm, parseRTTTL} from './lib';
+import {createSynth, extractRTTTLBpm, parseRTTTL, warmupAudio} from './lib';
 import type {ExtendedOscillatorType} from './lib';
 import {BASE_PRESETS, loadExtraPresets} from './preset-data';
 import type {PlaygroundPreset} from './preset-data';
@@ -78,6 +78,17 @@ export default function App() {
 
     useEffect(() => {
         return () => synthRef.current.dispose();
+    }, []);
+
+    useEffect(() => {
+        const warmupOnce = () => {
+            void warmupAudio();
+        };
+
+        document.addEventListener('pointerdown', warmupOnce, {once: true});
+        return () => {
+            document.removeEventListener('pointerdown', warmupOnce);
+        };
     }, []);
 
     useEffect(() => {

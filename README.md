@@ -52,6 +52,15 @@ synth.dispose();
 - `parseRTTTL(text)` returns parsed note events.
 - `extractRTTTLBpm(text)` returns the RTTTL `b=` value or `null`.
 - `buildPlaybackTimeline(notes, bpm)` returns deterministic schedule points in seconds.
+- `warmupAudio()` pre-warms shared audio context to reduce first-play latency.
+
+```ts
+import {warmupAudio} from 'web-rtttl-synth';
+
+document.addEventListener('pointerdown', () => {
+    void warmupAudio();
+}, {once: true});
+```
 
 ## Options
 
