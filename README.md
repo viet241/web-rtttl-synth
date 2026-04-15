@@ -1,7 +1,9 @@
 # RTTTL Web Audio Synth
 
 This started as a fun side project more than 10 years ago, originally used to add a few sound effects to websites.
-Now it has been revived into a complete TypeScript library with AI assistance, including a modern playground and a huge preset catalog ready to copy and play.
+Now it has been revived into a complete TypeScript library with AI assistance, plus a modern Playground that includes a huge built-in RTTTL preset library ready to copy and play.
+Not sure if anyone will use this project, but I'll publish it just for fun.
+
 
 ## Install
 
@@ -70,9 +72,11 @@ npm run build:lib  # ESM + CJS + .d.ts outputs
 npm test
 ```
 
-## Publishing
-
-```bash
-npm run build:lib
-npm publish
-```
+## Credits
+Some preset collections in the Playground were curated and adapted from these community resources:
+- RTTTL parsing reference and inspiration:
+https://1j01.github.io/rtttl.js/
+- Public ringtone browsing source:
+https://ringtone.vulc.in/
+- Large ringtone text dataset source:
+https://microblocks.fun/mbtest/NokringTunes.txt

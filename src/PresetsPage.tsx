@@ -26,10 +26,12 @@ export default function PresetsPage() {
     const [query, setQuery] = useState('');
     const [minBpm, setMinBpm] = useState('');
     const [maxBpm, setMaxBpm] = useState('');
+    const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [playingId, setPlayingId] = useState<string | null>(null);
     const [listSize, setListSize] = useState({height: 320, width: 320});
     const listContainerRef = useRef<HTMLDivElement | null>(null);
+    const activeSynthRef = useRef<ReturnType<typeof createSynth> | null>(null);
 
     useEffect(() => {
         let active = true;
@@ -63,6 +65,20 @@ export default function PresetsPage() {
 
     const deferredQuery = useDeferredValue(query);
 
+    const availableCollections = useMemo(() => {
+        const unique = new Set<string>();
+        presets.forEach((preset) => unique.add(preset.collection));
+        return [...unique].sort((a, b) => a.localeCompare(b));
+    }, [presets]);
+
+    const toggleCollection = (collection: string) => {
+        setSelectedCollections((previous) =>
+            previous.includes(collection)
+                ? previous.filter((item) => item !== collection)
+                : [...previous, collection],
+        );
+    };
+
     const filtered = useMemo(() => {
         const normalized = deferredQuery.trim().toLowerCase();
         const min = minBpm ? Number.parseInt(minBpm, 10) : Number.NEGATIVE_INFINITY;
@@ -70,9 +86,11 @@ export default function PresetsPage() {
         return presets.filter((preset) => {
             const matchedName = !normalized || preset.name.toLowerCase().includes(normalized);
             const matchedBpm = preset.bpm >= min && preset.bpm <= max;
-            return matchedName && matchedBpm;
+            const matchedCollection =
+                selectedCollections.length === 0 || selectedCollections.includes(preset.collection);
+            return matchedName && matchedBpm && matchedCollection;
         });
-    }, [deferredQuery, maxBpm, minBpm, presets]);
+    }, [deferredQuery, maxBpm, minBpm, presets, selectedCollections]);
 
     useEffect(() => {
         if (!listContainerRef.current) {
@@ -91,6 +109,13 @@ export default function PresetsPage() {
         return () => observer.disconnect();
     }, []);
 
+    useEffect(() => {
+        return () => {
+            activeSynthRef.current?.dispose();
+            activeSynthRef.current = null;
+        };
+    }, []);
+
     const copyRTTTL = async (preset: PlaygroundPreset) => {
         await navigator.clipboard.writeText(preset.notes);
         setCopiedId(preset.id);
@@ -98,13 +123,24 @@ export default function PresetsPage() {
     };
 
     const playPreset = async (preset: PlaygroundPreset) => {
+        activeSynthRef.current?.dispose();
         const synth = createSynth();
+        activeSynthRef.current = synth;
         setPlayingId(preset.id);
         synth.loadRTTTL(preset.notes, {bpmOverride: preset.bpm});
         const handle = await synth.play({
             oscillatorType: (preset.type ?? 'sine') as ExtendedOscillatorType,
-            onStop: () => setPlayingId(null),
-            onEnded: () => setPlayingId(null),
+            onStop: () => {
+                if (activeSynthRef.current === synth) {
+                    setPlayingId(null);
+                }
+            },
+            onEnded: () => {
+                if (activeSynthRef.current === synth) {
+                    setPlayingId(null);
+                    activeSynthRef.current = null;
+                }
+            },
         });
         void handle.whenEnded;
     };
@@ -154,7 +190,28 @@ export default function PresetsPage() {
                         type="number"
                     />
                     <div className="mono-text text-[11px] text-[#4a7c8c] uppercase flex items-center">
-                        {filtered.length}/{presets.length} presets {!isExtraLoaded ? '(loading nokring-tunes...)' : ''}
+                        {filtered.length}/{presets.length} presets {!isExtraLoaded ? '(loading extra libraries...)' : ''}
+                    </div>
+                </div>
+                <div className="bg-[rgba(0,243,255,0.02)] border border-[rgba(0,243,255,0.15)] rounded p-3">
+                    <div className="mono-text text-[11px] text-[#4a7c8c] uppercase mb-2">
+                        Collection Filter (multi-select)
+                    </div>
+                    <div className="flex flex-wrap gap-x-4 gap-y-2">
+                        {availableCollections.map((collection) => (
+                            <label
+                                key={collection}
+                                className="mono-text text-[11px] text-[#e0f7fa] flex items-center gap-2 cursor-pointer"
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={selectedCollections.includes(collection)}
+                                    onChange={() => toggleCollection(collection)}
+                                    className="accent-[#00f3ff]"
+                                />
+                                <span>{collection}</span>
+                            </label>
+                        ))}
                     </div>
                 </div>
 

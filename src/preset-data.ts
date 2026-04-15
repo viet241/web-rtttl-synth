@@ -34,6 +34,21 @@ export function mapLibraryPresets(rawPresets: LibraryPreset[]): PlaygroundPreset
 export const BASE_PRESETS: PlaygroundPreset[] = mapLibraryPresets(library.presets as LibraryPreset[]);
 
 export async function loadExtraPresets(): Promise<PlaygroundPreset[]> {
-    const module = await import('./nokring-tunes.json');
-    return mapLibraryPresets(module.default.presets as LibraryPreset[]);
+    const [nokringModule, merwinsModule] = await Promise.all([
+        import('./nokring-tunes.json'),
+        import('./merwins-ringtons.json'),
+    ]);
+
+    const merged = [
+        ...mapLibraryPresets(nokringModule.default.presets as LibraryPreset[]),
+        ...mapLibraryPresets(merwinsModule.default.presets as LibraryPreset[]),
+    ];
+    const uniqueById = new Map<string, PlaygroundPreset>();
+    merged.forEach((preset) => {
+        if (!uniqueById.has(preset.id)) {
+            uniqueById.set(preset.id, preset);
+        }
+    });
+
+    return [...uniqueById.values()];
 }

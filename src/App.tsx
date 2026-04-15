@@ -236,7 +236,7 @@ export default function App() {
               />
               <div className="mono-text text-[10px] text-[#4a7c8c] uppercase mt-2">
                 Showing {filteredPresets.length}/{presets.length} presets
-                {!isLibrary2Loaded ? ' (loading nokring-tunes...)' : ''}
+                {!isLibrary2Loaded ? ' (loading extra libraries...)' : ''}
               </div>
 
               <div className="mt-3 flex-1 overflow-y-auto overflow-x-hidden pr-1 flex flex-col gap-2">
